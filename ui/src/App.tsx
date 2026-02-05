@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getDominantColor } from "./getDominantColor";
 
 interface Track {
     title: string;
@@ -10,24 +11,6 @@ export default function App() {
     const [track, setTrack] = useState<Track | null>(null);
     const [bgColor, setBgColor] = useState("black");
     const [textColor, setTextColor] = useState("white");
-
-    // Compute average color
-    const getAverageColor = (imageUrl: string) =>
-        new Promise<string>((resolve) => {
-            const img = new Image();
-            img.crossOrigin = "Anonymous";
-            img.src = imageUrl;
-            img.onload = () => {
-                const canvas = document.createElement("canvas");
-                canvas.width = 1;
-                canvas.height = 1;
-                const ctx = canvas.getContext("2d")!;
-                ctx.drawImage(img, 0, 0, 1, 1);
-                const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-                resolve(`rgb(${r}, ${g}, ${b})`);
-            };
-            img.onerror = () => resolve("black");
-        });
 
     // Decide if a color is light or dark
     const isColorLight = (rgb: string) => {
@@ -72,7 +55,7 @@ export default function App() {
 
     useEffect(() => {
         if (track?.cover) {
-            getAverageColor(track.cover).then((color) => {
+            getDominantColor(track.cover).then((color) => {
                 setBgColor(color);
                 setTextColor(isColorLight(color) ? "black" : "white");
             });
