@@ -1,5 +1,6 @@
 let overlayWindowId = null;
 
+// open extension in window
 browser.browserAction.onClicked.addListener(() => {
   browser.windows.create({
     url: browser.runtime.getURL('ui/index.html'),

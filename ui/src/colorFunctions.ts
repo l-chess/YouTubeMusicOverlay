@@ -46,3 +46,11 @@ export const getDominantColor = (imageUrl: string) =>
 
         img.onerror = () => resolve("black");
     });
+
+export const isColorLight = (rgb: string) => {
+    const match = rgb.match(/\d+/g);
+    if (!match) return false;
+    const [r, g, b] = match.map(Number);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 160;
+  };

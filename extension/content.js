@@ -36,6 +36,7 @@ const observer = new MutationObserver(() => {
 
 observer.observe(document.body, { childList: true, subtree: true });
 
+// responds to request for changed track from App.tsx
 browser.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'GET_TRACK') {
     return Promise.resolve({ data: getNowPlaying() });

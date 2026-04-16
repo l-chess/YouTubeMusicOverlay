@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { getDominantColor } from "./getDominantColor";
+import { getDominantColor } from "./colorFunctions";
+import { isColorLight } from "./colorFunctions";
 
 interface Track {
   title: string;
@@ -11,14 +12,6 @@ export default function App() {
   const [track, setTrack] = useState<Track | null>(null);
   const [bgColor, setBgColor] = useState("black");
   const [textColor, setTextColor] = useState("white");
-
-  const isColorLight = (rgb: string) => {
-    const match = rgb.match(/\d+/g);
-    if (!match) return false;
-    const [r, g, b] = match.map(Number);
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 160;
-  };
 
   useEffect(() => {
     let browser: typeof import("webextension-polyfill") | null = null;
@@ -59,6 +52,7 @@ export default function App() {
     };
   }, []);
 
+  // sets dominant colour as background colour
   useEffect(() => {
     if (track?.cover) {
       getDominantColor(track.cover).then((color) => {
