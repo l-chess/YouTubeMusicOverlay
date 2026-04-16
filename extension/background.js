@@ -1,14 +1,10 @@
 let overlayWindowId = null;
 
-// open extension in window
+// open extension in tab
 browser.browserAction.onClicked.addListener(() => {
-  browser.windows.create({
-    url: browser.runtime.getURL('ui/index.html'),
-    type: 'normal',
-    state: 'fullscreen'
-  }).then((win) => {
-    overlayWindowId = win.id;
-  });
+  browser.tabs.create({
+    url: browser.runtime.getURL('ui/index.html')
+  })
 });
 
 browser.runtime.onMessage.addListener((msg) => {
