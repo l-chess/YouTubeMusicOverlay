@@ -1,26 +1,11 @@
-import { useEffect, useState } from "react";
-import { getDominantColor, isColorLight } from "./colorFunctions";
+import { setColors } from "./colorFunctions";
 import { useWakeLock } from "./useWakeLock";
 import { useTrack } from "./useTrack";
 
 export default function App() {
   const track = useTrack();
-  const [bgColor, setBgColor] = useState("black");
-  const [textColor, setTextColor] = useState("white");
-
+  const { bgColor, textColor } = setColors(track?.cover);
   useWakeLock();
-
-  useEffect(() => {
-    if (track?.cover) {
-      getDominantColor(track.cover).then((color) => {
-        setBgColor(color);
-        setTextColor(isColorLight(color) ? "black" : "white");
-      });
-    } else {
-      setBgColor("black");
-      setTextColor("white");
-    }
-  }, [track?.cover]);
 
   return (
     <div
@@ -39,7 +24,9 @@ export default function App() {
         </div>
       )}
       <h1 className="text-3xl">{track ? track.title : "Unknown Title"}</h1>
-      <h2 className="text-xl opacity-80">{track ? track.artist : "Unknown Artist"}</h2>
+      <h2 className="text-xl opacity-80">
+        {track ? track.artist : "Unknown Artist"}
+      </h2>
     </div>
   );
 }
