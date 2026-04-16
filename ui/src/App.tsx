@@ -1,61 +1,15 @@
 import { useEffect, useState } from "react";
-import { getDominantColor } from "./colorFunctions";
-import { isColorLight } from "./colorFunctions";
+import { getDominantColor, isColorLight } from "./colorFunctions";
 import { useWakeLock } from "./useWakeLock";
-
-interface Track {
-  title: string;
-  artist: string;
-  cover: string;
-}
+import { useTrack } from "./useTrack";
 
 export default function App() {
-  const [track, setTrack] = useState<Track | null>(null);
+  const track = useTrack();
   const [bgColor, setBgColor] = useState("black");
   const [textColor, setTextColor] = useState("white");
 
   useWakeLock();
 
-  useEffect(() => {
-    let browser: typeof import("webextension-polyfill") | null = null;
-
-    async function init() {
-      if (typeof window !== "undefined") {
-        try {
-          browser = await import("webextension-polyfill");
-
-          browser.runtime.onMessage.addListener((msg: any) => {
-            if (msg.type === "TRACK_CHANGE") {
-              setTrack(msg.data);
-            }
-          });
-
-          browser.runtime.sendMessage({ type: "GET_TRACK" })
-            .then((response: any) => {
-              if (response?.data) setTrack(response.data);
-            })
-            .catch(() => {});
-
-        } catch {
-          console.warn("Not running inside a browser extension, ignoring messages.");
-        }
-      }
-    }
-
-    init();
-
-    return () => {
-      if (browser) {
-        browser.runtime.onMessage.removeListener((msg: any) => {
-          if (msg.type === "TRACK_CHANGE") {
-            setTrack(msg.data);
-          }
-        });
-      }
-    };
-  }, []);
-
-  // sets dominant colour as background colour
   useEffect(() => {
     if (track?.cover) {
       getDominantColor(track.cover).then((color) => {
@@ -80,7 +34,7 @@ export default function App() {
           alt="Album Cover"
         />
       ) : (
-        <div className="w-72 h-72 rounded-xl mb-5 object-cover bg-black flex items-center justify-center">
+        <div className="w-72 h-72 rounded-xl mb-5 bg-black flex items-center justify-center">
           No Cover
         </div>
       )}
