@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getDominantColor } from "./colorFunctions";
 import { isColorLight } from "./colorFunctions";
+import { useWakeLock } from "./useWakeLock";
 
 interface Track {
   title: string;
@@ -12,6 +13,8 @@ export default function App() {
   const [track, setTrack] = useState<Track | null>(null);
   const [bgColor, setBgColor] = useState("black");
   const [textColor, setTextColor] = useState("white");
+
+  useWakeLock();
 
   useEffect(() => {
     let browser: typeof import("webextension-polyfill") | null = null;
