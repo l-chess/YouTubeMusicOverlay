@@ -1,33 +1,28 @@
 let lastTrack = { title: null, artist: null, cover: null };
 
+// change album cover resolution
 function upgradeCoverUrl(url, size = 544) {
   if (!url || !url.includes('lh3.googleusercontent.com')) return url;
-
-  // Split on '=' to isolate the w/h segment at the end
   const parts = url.split('=');
   const lastPart = parts[parts.length - 1];
-
-  // Replace only the wXX-hXX part safely
   const upgraded = lastPart.replace(/w\d+-h\d+/, 'w' + size + '-h' + size);
-
   parts[parts.length - 1] = upgraded;
   return parts.join('=');
 }
 
+// fetch current song text data
 function getNowPlaying() {
   const title = document.querySelector('ytmusic-player-bar .title')?.textContent || '';
   const byline = document.querySelector('ytmusic-player-bar .byline')?.textContent || '';
   let cover = document.querySelector('ytmusic-player-bar img')?.src || '';
-
-  cover = upgradeCoverUrl(cover, 544); // safe upgrade
-
+  cover = upgradeCoverUrl(cover, 544);
   const artist = byline.split('•')[0].trim();
   return { title, artist, cover };
 }
 
+// listens for changes
 const observer = new MutationObserver(() => {
   const data = getNowPlaying();
-
   if (
     data.title &&
     (data.title !== lastTrack.title ||
@@ -40,3 +35,9 @@ const observer = new MutationObserver(() => {
 });
 
 observer.observe(document.body, { childList: true, subtree: true });
+
+browser.runtime.onMessage.addListener((msg) => {
+  if (msg.type === 'GET_TRACK') {
+    return Promise.resolve({ data: getNowPlaying() });
+  }
+});
