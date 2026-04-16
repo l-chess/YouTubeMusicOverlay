@@ -1,5 +1,3 @@
-let overlayWindowId = null;
-
 // open extension in tab
 browser.browserAction.onClicked.addListener(() => {
   browser.tabs.create({
