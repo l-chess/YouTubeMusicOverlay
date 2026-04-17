@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 export const getDominantColor = (imageUrl: string) =>
 	new Promise<string>((resolve) => {
 		const img = new Image();
+		img.crossOrigin = "Anonymous";
 		img.src = imageUrl;
 		img.onload = () => {
 			const canvas = document.createElement("canvas");
@@ -18,7 +19,10 @@ export const getDominantColor = (imageUrl: string) =>
 			const cy = size / 2;
 			const innerRadius = size / 4;
 
-			let r = 0, g = 0, b = 0, count = 0;
+			let r = 0,
+				g = 0,
+				b = 0,
+				count = 0;
 
 			for (let y = 0; y < size; y++) {
 				for (let x = 0; x < size; x++) {
@@ -38,7 +42,9 @@ export const getDominantColor = (imageUrl: string) =>
 			}
 
 			if (count === 0) return resolve("black");
-			resolve(`rgb(${Math.round(r / count)}, ${Math.round(g / count)}, ${Math.round(b / count)})`);
+			resolve(
+				`rgb(${Math.round(r / count)}, ${Math.round(g / count)}, ${Math.round(b / count)})`,
+			);
 		};
 		img.onerror = () => resolve("black");
 	});
