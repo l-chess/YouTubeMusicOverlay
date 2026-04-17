@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 export const getDominantColor = (imageUrl: string) =>
 	new Promise<string>((resolve) => {
 		const img = new Image();
-		img.crossOrigin = "Anonymous";
 		img.src = imageUrl;
 		img.onload = () => {
 			const canvas = document.createElement("canvas");
@@ -14,26 +13,32 @@ export const getDominantColor = (imageUrl: string) =>
 			if (!ctx) return resolve("black");
 			ctx.drawImage(img, 0, 0, size, size);
 			const imageData = ctx.getImageData(0, 0, size, size).data;
-			const colorCount = new Map<string, number>();
-			const quantize = (value: number) => Math.round(value / 32) * 32;
-			for (let i = 0; i < imageData.length; i += 4) {
-				const r = quantize(imageData[i]);
-				const g = quantize(imageData[i + 1]);
-				const b = quantize(imageData[i + 2]);
-				const a = imageData[i + 3];
-				if (a < 128) continue;
-				const key = `${r},${g},${b}`;
-				colorCount.set(key, (colorCount.get(key) || 0) + 1);
-			}
-			let dominant = "0,0,0";
-			let max = 0;
-			for (const [color, count] of colorCount) {
-				if (count > max) {
-					max = count;
-					dominant = color;
+
+			const cx = size / 2;
+			const cy = size / 2;
+			const innerRadius = size / 4;
+
+			let r = 0, g = 0, b = 0, count = 0;
+
+			for (let y = 0; y < size; y++) {
+				for (let x = 0; x < size; x++) {
+					const dx = x - cx;
+					const dy = y - cy;
+					if (Math.sqrt(dx * dx + dy * dy) < innerRadius) continue;
+
+					const i = (y * size + x) * 4;
+					const a = imageData[i + 3];
+					if (a < 128) continue;
+
+					r += imageData[i];
+					g += imageData[i + 1];
+					b += imageData[i + 2];
+					count++;
 				}
 			}
-			resolve(`rgb(${dominant})`);
+
+			if (count === 0) return resolve("black");
+			resolve(`rgb(${Math.round(r / count)}, ${Math.round(g / count)}, ${Math.round(b / count)})`);
 		};
 		img.onerror = () => resolve("black");
 	});
