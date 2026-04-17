@@ -15,18 +15,11 @@ export const getDominantGradient = (imageUrl: string) =>
 			ctx.drawImage(img, 0, 0, size, size);
 			const imageData = ctx.getImageData(0, 0, size, size).data;
 
-			const cx = size / 2;
-			const cy = size / 2;
-			const innerRadius = size / 4;
 			const colorCount = new Map<string, number>();
 			const quantize = (value: number) => Math.round(value / 32) * 32;
 
 			for (let y = 0; y < size; y++) {
 				for (let x = 0; x < size; x++) {
-					const dx = x - cx;
-					const dy = y - cy;
-					if (Math.sqrt(dx * dx + dy * dy) < innerRadius) continue;
-
 					const i = (y * size + x) * 4;
 					const a = imageData[i + 3];
 					if (a < 128) continue;
