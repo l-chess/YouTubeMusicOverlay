@@ -6,8 +6,8 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-  "includes": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "!!**/dist"]
-},
+		"includes": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "!!**/dist"]
+	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab",

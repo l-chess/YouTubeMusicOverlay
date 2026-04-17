@@ -1,1 +1,1 @@
-cd ui && npm run check && npm run build
+cd ui && npm run check && npm run build && git add ../extension/ui
