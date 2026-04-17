@@ -22,12 +22,12 @@ export default function App() {
 		>
 			{track?.cover ? (
 				<img
-					className="w-72 h-72 rounded-xl mb-5 object-cover shadow-lg"
+					className="w-96 h-96 rounded-xl mb-5 object-cover shadow-lg"
 					src={track.cover}
 					alt="Album Cover"
 				/>
 			) : (
-				<div className="w-72 h-72 rounded-xl mb-5 bg-black flex items-center justify-center">
+				<div className="w-96 h-96 rounded-xl mb-5 bg-black flex items-center justify-center">
 					No Cover
 				</div>
 			)}
