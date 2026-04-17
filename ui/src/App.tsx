@@ -10,7 +10,7 @@ export default function App() {
 	return (
 		<div
 			className="flex flex-col items-center justify-center h-screen transition-colors duration-500"
-			style={{ backgroundColor: bgColor, color: textColor }}
+			style={{ backgroundImage: bgColor, color: textColor }}
 		>
 			{track?.cover ? (
 				<img

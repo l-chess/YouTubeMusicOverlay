@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-export const getDominantColor = (imageUrl: string) =>
-	new Promise<string>((resolve) => {
+export const getDominantGradient = (imageUrl: string) =>
+	new Promise<{ primary: string; secondary: string }>((resolve) => {
 		const img = new Image();
 		img.crossOrigin = "Anonymous";
 		img.src = imageUrl;
@@ -11,18 +11,15 @@ export const getDominantColor = (imageUrl: string) =>
 			canvas.width = size;
 			canvas.height = size;
 			const ctx = canvas.getContext("2d");
-			if (!ctx) return resolve("black");
+			if (!ctx) return resolve({ primary: "black", secondary: "black" });
 			ctx.drawImage(img, 0, 0, size, size);
 			const imageData = ctx.getImageData(0, 0, size, size).data;
 
 			const cx = size / 2;
 			const cy = size / 2;
 			const innerRadius = size / 4;
-
-			let r = 0,
-				g = 0,
-				b = 0,
-				count = 0;
+			const colorCount = new Map<string, number>();
+			const quantize = (value: number) => Math.round(value / 32) * 32;
 
 			for (let y = 0; y < size; y++) {
 				for (let x = 0; x < size; x++) {
@@ -34,19 +31,21 @@ export const getDominantColor = (imageUrl: string) =>
 					const a = imageData[i + 3];
 					if (a < 128) continue;
 
-					r += imageData[i];
-					g += imageData[i + 1];
-					b += imageData[i + 2];
-					count++;
+					const r = quantize(imageData[i]);
+					const g = quantize(imageData[i + 1]);
+					const b = quantize(imageData[i + 2]);
+					const key = `${r},${g},${b}`;
+					colorCount.set(key, (colorCount.get(key) || 0) + 1);
 				}
 			}
 
-			if (count === 0) return resolve("black");
-			resolve(
-				`rgb(${Math.round(r / count)}, ${Math.round(g / count)}, ${Math.round(b / count)})`,
-			);
+			const sorted = [...colorCount.entries()].sort((a, b) => b[1] - a[1]);
+			const primary = sorted[0] ? `rgb(${sorted[0][0]})` : "black";
+			const secondary = sorted[1] ? `rgb(${sorted[1][0]})` : primary;
+
+			resolve({ primary, secondary });
 		};
-		img.onerror = () => resolve("black");
+		img.onerror = () => resolve({ primary: "black", secondary: "black" });
 	});
 
 export const isColorLight = (rgb: string) => {
@@ -62,9 +61,9 @@ export const useTrackColors = (cover?: string) => {
 
 	useEffect(() => {
 		if (cover) {
-			getDominantColor(cover).then((color) => {
-				setBgColor(color);
-				setTextColor(isColorLight(color) ? "black" : "white");
+			getDominantGradient(cover).then(({ primary, secondary }) => {
+				setBgColor(`linear-gradient(135deg, ${primary}, ${secondary})`);
+				setTextColor(isColorLight(primary) ? "black" : "white");
 			});
 		} else {
 			setBgColor("black");
