@@ -6,7 +6,9 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build && cp -r dist/* ../extension/ui/",
-		"lint": "eslint .",
+		"lint": "biome lint .",
+		"format": "biome format . --write",
+		"check": "biome check . --write",
 		"preview": "vite preview"
 	},
 	"dependencies": {
