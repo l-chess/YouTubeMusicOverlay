@@ -10,7 +10,15 @@ export default function App() {
 	return (
 		<div
 			className="flex flex-col items-center justify-center h-screen transition-colors duration-500"
-			style={{ backgroundImage: bgColor, color: textColor }}
+			style={{
+				backgroundImage: bgColor.startsWith("linear-gradient")
+					? bgColor
+					: "none",
+				backgroundColor: bgColor.startsWith("linear-gradient")
+					? "transparent"
+					: bgColor,
+				color: textColor,
+			}}
 		>
 			{track?.cover ? (
 				<img
