@@ -116,7 +116,11 @@ export const useTrackColors = (cover?: string) => {
 		if (cover) {
 			getDominantGradient(cover).then(
 				({ primary, secondary, primaryPercent }) => {
-					if (primaryPercent >= 80) {
+					console.log(JSON.stringify(primary));
+					if (primary === "rgb(0,0,0)" || primary === "rgb(256,256,256)") {
+						setBgColor(primary);
+						setTextColor(isColorLight(primary) ? "black" : "white");
+					} else if (primaryPercent >= 85) {
 						getDominantColor(cover).then((color) => {
 							setBgColor(color);
 							setTextColor(isColorLight(color) ? "black" : "white");
