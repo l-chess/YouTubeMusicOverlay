@@ -53,6 +53,54 @@ export const getDominantGradient = (imageUrl: string) =>
 		},
 	);
 
+export const getDominantColor = (imageUrl: string) =>
+	new Promise<string>((resolve) => {
+		const img = new Image();
+		img.crossOrigin = "Anonymous";
+		img.src = imageUrl;
+		img.onload = () => {
+			const canvas = document.createElement("canvas");
+			const size = 50;
+			canvas.width = size;
+			canvas.height = size;
+			const ctx = canvas.getContext("2d");
+			if (!ctx) return resolve("black");
+			ctx.drawImage(img, 0, 0, size, size);
+			const imageData = ctx.getImageData(0, 0, size, size).data;
+			const cx = size / 2;
+			const cy = size / 2;
+			const innerRadius = size / 4;
+
+			let r = 0,
+				g = 0,
+				b = 0,
+				count = 0;
+
+			for (let y = 0; y < size; y++) {
+				for (let x = 0; x < size; x++) {
+					const dx = x - cx;
+					const dy = y - cy;
+					if (Math.sqrt(dx * dx + dy * dy) < innerRadius) continue;
+
+					const i = (y * size + x) * 4;
+					const a = imageData[i + 3];
+					if (a < 128) continue;
+
+					r += imageData[i];
+					g += imageData[i + 1];
+					b += imageData[i + 2];
+					count++;
+				}
+			}
+
+			if (count === 0) return resolve("black");
+			resolve(
+				`rgb(${Math.round(r / count)}, ${Math.round(g / count)}, ${Math.round(b / count)})`,
+			);
+		};
+		img.onerror = () => resolve("black");
+	});
+
 export const isColorLight = (rgb: string) => {
 	const match = rgb.match(/\d+/g);
 	if (!match) return false;
@@ -69,14 +117,17 @@ export const useTrackColors = (cover?: string) => {
 			getDominantGradient(cover).then(
 				({ primary, secondary, primaryPercent }) => {
 					if (primaryPercent >= 80) {
-						setBgColor(primary);
+						getDominantColor(cover).then((color) => {
+							setBgColor(color);
+							setTextColor(isColorLight(color) ? "black" : "white");
+						});
 					} else {
 						const softenedPercent = Math.round(primaryPercent * 0.7);
 						setBgColor(
 							`linear-gradient(135deg, ${primary} ${softenedPercent}%, ${secondary})`,
 						);
+						setTextColor(isColorLight(primary) ? "black" : "white");
 					}
-					setTextColor(isColorLight(primary) ? "black" : "white");
 				},
 			);
 		} else {
