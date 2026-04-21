@@ -24,10 +24,10 @@ export default function App() {
 				<img
 					className="w-96 h-96 rounded-xl mb-5 object-cover shadow-lg"
 					src={track.cover}
-					alt="Album Cover"
+					alt={`${track.title} ${track.artist}`}
 				/>
 			) : (
-				<div className="w-96 h-96 rounded-xl mb-5 bg-black flex items-center justify-center">
+				<div className="w-96 h-96 rounded-xl mb-5 bg-gray-900 flex items-center justify-center">
 					No Cover
 				</div>
 			)}
