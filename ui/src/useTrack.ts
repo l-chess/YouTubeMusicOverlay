@@ -27,7 +27,7 @@ export function useTrack() {
 				browser.runtime
 					.sendMessage({ type: "GET_TRACK" })
 					.then((response: unknown) => {
-						const res = response as { data: Track } | null;
+						const res = response as { data: Track | null } | null;
 						if (res?.data) setTrack(res.data);
 					})
 					.catch(() => {});

@@ -17,6 +17,9 @@ function getNowPlaying() {
   let cover = document.querySelector('ytmusic-player-bar img')?.src || '';
   cover = upgradeCoverUrl(cover, 544);
   const artist = byline.split('•')[0].trim();
+
+  if (!title && !artist) return null;
+
   return { title, artist, cover };
 }
 

@@ -6,6 +6,7 @@ export default function App() {
 	const track = useTrack();
 	const { bgColor, textColor } = useTrackColors(track?.cover);
 	useWakeLock();
+	console.log(track);
 
 	return (
 		<div
@@ -27,7 +28,7 @@ export default function App() {
 					alt={`${track.title} ${track.artist}`}
 				/>
 			) : (
-				<div className="w-96 h-96 rounded-xl mb-5 bg-gray-900 flex items-center justify-center">
+				<div className="w-96 h-96 rounded-xl mb-5 bg-gray-950 flex items-center justify-center">
 					No Cover
 				</div>
 			)}
