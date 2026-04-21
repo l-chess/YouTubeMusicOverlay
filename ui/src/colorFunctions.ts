@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+// finds the most common two colours in an image and the percentage by which primary dominates
 export const getDominantGradient = (imageUrl: string) =>
 	new Promise<{ primary: string; secondary: string; primaryPercent: number }>(
 		(resolve) => {
@@ -53,6 +54,7 @@ export const getDominantGradient = (imageUrl: string) =>
 		},
 	);
 
+// determines average rgb value across the outer half of the image
 export const getDominantColor = (imageUrl: string) =>
 	new Promise<string>((resolve) => {
 		const img = new Image();
@@ -123,17 +125,9 @@ export const useTrackColors = (cover?: string) => {
 						.substring(4, secondary.length - 1)
 						.split(",");
 
-					if (
+					if ( // if primary or secondary are on the grayscale, primary is set as background
 						primaryRGB.every((e) => e === primaryRGB[0]) ||
 						secondaryRGB.every((e) => e === secondaryRGB[0])
-					) {
-						setBgColor(primary);
-						setTextColor(isColorLight(primary) ? "black" : "white");
-					} else if (
-						primaryPercent >= 75 &&
-						(primary === "rgb(0,0,0)" ||
-							primary === "rgb(256,256,256)" ||
-							primary === "rgb(224,224,224)")
 					) {
 						setBgColor(primary);
 						setTextColor(isColorLight(primary) ? "black" : "white");
