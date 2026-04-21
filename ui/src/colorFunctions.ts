@@ -116,13 +116,16 @@ export const useTrackColors = (cover?: string) => {
 		if (cover) {
 			getDominantGradient(cover).then(
 				({ primary, secondary, primaryPercent }) => {
+					const primaryRGB = primary
+						.substring(4, primary.length - 1)
+						.split(",");
+					const secondaryRGB = secondary
+						.substring(4, secondary.length - 1)
+						.split(",");
+
 					if (
-						(primary === "rgb(0,0,0)" ||
-							primary === "rgb(256,256,256)" ||
-							primary === "rgb(224,224,224)") &&
-						(secondary === "rgb(0,0,0)" ||
-							secondary === "rgb(256,256,256)" ||
-							secondary === "rgb(224,224,224)")
+						primaryRGB.every((e) => e === primaryRGB[0]) ||
+						secondaryRGB.every((e) => e === secondaryRGB[0])
 					) {
 						setBgColor(primary);
 						setTextColor(isColorLight(primary) ? "black" : "white");
