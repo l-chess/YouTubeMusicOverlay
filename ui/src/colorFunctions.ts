@@ -1,108 +1,85 @@
 import { useEffect, useState } from "react";
 
-// finds the most common two colours in an image and the percentage by which primary dominates
-export const getDominantGradient = (imageUrl: string) =>
-	new Promise<{ primary: string; secondary: string; primaryPercent: number }>(
-		(resolve) => {
-			const img = new Image();
-			img.crossOrigin = "Anonymous";
-			img.src = imageUrl;
-			img.onload = () => {
-				const canvas = document.createElement("canvas");
-				const size = 50;
-				canvas.width = size;
-				canvas.height = size;
-				const ctx = canvas.getContext("2d");
-				if (!ctx)
-					return resolve({
-						primary: "black",
-						secondary: "black",
-						primaryPercent: 100,
-					});
-				ctx.drawImage(img, 0, 0, size, size);
-				const imageData = ctx.getImageData(0, 0, size, size).data;
-
-				const colorCount = new Map<string, number>();
-				const quantize = (value: number) => Math.round(value / 32) * 32;
-
-				for (let y = 0; y < size; y++) {
-					for (let x = 0; x < size; x++) {
-						const i = (y * size + x) * 4;
-						const a = imageData[i + 3];
-						if (a < 128) continue;
-
-						const r = quantize(imageData[i]);
-						const g = quantize(imageData[i + 1]);
-						const b = quantize(imageData[i + 2]);
-						const key = `${r},${g},${b}`;
-						colorCount.set(key, (colorCount.get(key) || 0) + 1);
-					}
-				}
-
-				const sorted = [...colorCount.entries()].sort((a, b) => b[1] - a[1]);
-				const primary = sorted[0] ? `rgb(${sorted[0][0]})` : "black";
-				const secondary = sorted[1] ? `rgb(${sorted[1][0]})` : primary;
-				const total = (sorted[0]?.[1] ?? 0) + (sorted[1]?.[1] ?? 0);
-				const primaryPercent = sorted[0]
-					? Math.round((sorted[0][1] / total) * 100)
-					: 100;
-
-				resolve({ primary, secondary, primaryPercent });
-			};
-			img.onerror = () =>
-				resolve({ primary: "black", secondary: "black", primaryPercent: 100 });
-		},
-	);
-
-// determines average rgb value across the outer half of the image
-export const getDominantColor = (imageUrl: string) =>
-	new Promise<string>((resolve) => {
+const loadImageData = (imageUrl: string, size = 50): Promise<Uint8ClampedArray> =>
+	new Promise((resolve, reject) => {
 		const img = new Image();
 		img.crossOrigin = "Anonymous";
 		img.src = imageUrl;
 		img.onload = () => {
 			const canvas = document.createElement("canvas");
-			const size = 50;
 			canvas.width = size;
 			canvas.height = size;
 			const ctx = canvas.getContext("2d");
-			if (!ctx) return resolve("black");
+			if (!ctx) return reject(new Error("No canvas context"));
 			ctx.drawImage(img, 0, 0, size, size);
-			const imageData = ctx.getImageData(0, 0, size, size).data;
-			const cx = size / 2;
-			const cy = size / 2;
-			const innerRadius = size / 4;
-
-			let r = 0,
-				g = 0,
-				b = 0,
-				count = 0;
-
-			for (let y = 0; y < size; y++) {
-				for (let x = 0; x < size; x++) {
-					const dx = x - cx;
-					const dy = y - cy;
-					if (Math.sqrt(dx * dx + dy * dy) < innerRadius) continue;
-
-					const i = (y * size + x) * 4;
-					const a = imageData[i + 3];
-					if (a < 128) continue;
-
-					r += imageData[i];
-					g += imageData[i + 1];
-					b += imageData[i + 2];
-					count++;
-				}
-			}
-
-			if (count === 0) return resolve("black");
-			resolve(
-				`rgb(${Math.round(r / count)}, ${Math.round(g / count)}, ${Math.round(b / count)})`,
-			);
+			resolve(ctx.getImageData(0, 0, size, size).data);
 		};
-		img.onerror = () => resolve("black");
+		img.onerror = () => reject(new Error("Image load failed"));
 	});
 
+const quantize = (value: number) => Math.round(value / 32) * 32;
+
+// finds the most common two colours in an image and the percentage by which primary dominates
+export const getDominantGradient = async (imageUrl: string): Promise<{ primary: string; secondary: string; primaryPercent: number }> => {
+	const fallback = { primary: "black", secondary: "black", primaryPercent: 100 };
+	try {
+		const data = await loadImageData(imageUrl);
+		const size = 50;
+		const colorCount = new Map<string, number>();
+
+		for (let y = 0; y < size; y++) {
+			for (let x = 0; x < size; x++) {
+				const i = (y * size + x) * 4;
+				if (data[i + 3] < 128) continue;
+				const key = `${quantize(data[i])},${quantize(data[i + 1])},${quantize(data[i + 2])}`;
+				colorCount.set(key, (colorCount.get(key) || 0) + 1);
+			}
+		}
+
+		const sorted = [...colorCount.entries()].sort((a, b) => b[1] - a[1]);
+		const primary = sorted[0] ? `rgb(${sorted[0][0]})` : "black";
+		const secondary = sorted[1] ? `rgb(${sorted[1][0]})` : primary;
+		const total = (sorted[0]?.[1] ?? 0) + (sorted[1]?.[1] ?? 0);
+		const primaryPercent = sorted[0] ? Math.round((sorted[0][1] / total) * 100) : 100;
+
+		return { primary, secondary, primaryPercent };
+	} catch {
+		return fallback;
+	}
+};
+
+// determines average rgb value across the outer half of the image
+export const getDominantColor = async (imageUrl: string): Promise<string> => {
+	try {
+		const data = await loadImageData(imageUrl);
+		const size = 50;
+		const cx = size / 2;
+		const cy = size / 2;
+		const innerRadius = size / 4;
+		let r = 0, g = 0, b = 0, count = 0;
+
+		for (let y = 0; y < size; y++) {
+			for (let x = 0; x < size; x++) {
+				const dx = x - cx;
+				const dy = y - cy;
+				if (Math.sqrt(dx * dx + dy * dy) < innerRadius) continue;
+				const i = (y * size + x) * 4;
+				if (data[i + 3] < 128) continue;
+				r += data[i];
+				g += data[i + 1];
+				b += data[i + 2];
+				count++;
+			}
+		}
+
+		if (count === 0) return "black";
+		return `rgb(${Math.round(r / count)}, ${Math.round(g / count)}, ${Math.round(b / count)})`;
+	} catch {
+		return "black";
+	}
+};
+
+// determines if (background) color is light
 export const isColorLight = (rgb: string) => {
 	const match = rgb.match(/\d+/g);
 	if (!match) return false;
@@ -110,6 +87,7 @@ export const isColorLight = (rgb: string) => {
 	return (r * 299 + g * 587 + b * 114) / 1000 > 160;
 };
 
+// sets background and text colour
 export const useTrackColors = (cover?: string) => {
 	const [bgColor, setBgColor] = useState("black");
 	const [textColor, setTextColor] = useState("white");
