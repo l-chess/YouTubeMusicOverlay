@@ -115,56 +115,39 @@ export const useTrackColors = (cover?: string) => {
 	const [textColor, setTextColor] = useState("white");
 
 	useEffect(() => {
-		if (cover) {
-			getDominantGradient(cover).then(
-				({ primary, secondary, primaryPercent }) => {
-					const primaryRGB = primary
-						.substring(4, primary.length - 1)
-						.split(",");
-					const secondaryRGB = secondary
-						.substring(4, secondary.length - 1)
-						.split(",");
-
-					if (
-						// if primary and secondary are on the grayscale, primary is set as background
-						primaryRGB.every((e) => e === primaryRGB[0]) &&
-						secondaryRGB.every((e) => e === secondaryRGB[0])
-					) {
-						setBgColor(primary);
-						setTextColor(isColorLight(primary) ? "black" : "white");
-					} else if (
-						// if primary doesn't dominate too much and is on grayscale, while secondary isn't, secondary is background
-						primaryRGB.every((e) => e === primaryRGB[0]) &&
-						!secondaryRGB.every((e) => e === secondaryRGB[0]) &&
-						primaryPercent < 70
-					) {
-						setBgColor(secondary);
-						setTextColor(isColorLight(secondary) ? "black" : "white");
-					} else if (
-						// set primary if primary isn't grayscale, but secondary is
-						!primaryRGB.every((e) => e === primaryRGB[0]) &&
-						secondaryRGB.every((e) => e === secondaryRGB[0])
-					) {
-						setBgColor(primary);
-						setTextColor(isColorLight(primary) ? "black" : "white");
-					} else if (primaryPercent >= 85) {
-						getDominantColor(cover).then((color) => {
-							setBgColor(color);
-							setTextColor(isColorLight(color) ? "black" : "white");
-						});
-					} else {
-						const softenedPercent = Math.round(primaryPercent * 0.7);
-						setBgColor(
-							`linear-gradient(135deg, ${primary} ${softenedPercent}%, ${secondary})`,
-						);
-						setTextColor(isColorLight(primary) ? "black" : "white");
-					}
-				},
-			);
-		} else {
+		if (!cover) {
 			setBgColor("black");
 			setTextColor("white");
+			return;
 		}
+
+		getDominantGradient(cover).then(({ primary, secondary, primaryPercent }) => {
+			const isGrayscale = (rgb: string) => {
+				const parts = rgb.substring(4, rgb.length - 1).split(",");
+				return parts.every((e) => e === parts[0]);
+			};
+
+			const primaryGray = isGrayscale(primary);
+			const secondaryGray = isGrayscale(secondary);
+
+			const setFlat = (color: string) => {
+				setBgColor(color);
+				setTextColor(isColorLight(color) ? "black" : "white");
+			};
+
+			if (primaryGray && secondaryGray) return setFlat(primary);
+			if (primaryGray && !secondaryGray && primaryPercent < 70) return setFlat(secondary);
+			if (!primaryGray && secondaryGray) return setFlat(primary);
+
+			if (primaryPercent >= 85) {
+				getDominantColor(cover).then(setFlat);
+				return;
+			}
+
+			const softenedPercent = Math.round(primaryPercent * 0.7);
+			setBgColor(`linear-gradient(135deg, ${primary} ${softenedPercent}%, ${secondary})`);
+			setTextColor(isColorLight(primary) ? "black" : "white");
+		});
 	}, [cover]);
 
 	return { bgColor, textColor };
