@@ -1,12 +1,14 @@
 import { useTrackColors } from "./colorFunctions";
+import { useCursor } from "./useCursor";
 import { useTrack } from "./useTrack";
 import { useWakeLock } from "./useWakeLock";
 
 export default function App() {
 	const track = useTrack();
 	const { bgColor, textColor } = useTrackColors(track?.cover);
+
 	useWakeLock();
-	console.log(track);
+	useCursor();
 
 	return (
 		<div

@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 
-const loadImageData = (imageUrl: string, size = 50): Promise<Uint8ClampedArray> =>
+const loadImageData = (
+	imageUrl: string,
+	size = 50,
+): Promise<Uint8ClampedArray> =>
 	new Promise((resolve, reject) => {
 		const img = new Image();
 		img.crossOrigin = "Anonymous";
@@ -20,8 +23,14 @@ const loadImageData = (imageUrl: string, size = 50): Promise<Uint8ClampedArray> 
 const quantize = (value: number) => Math.round(value / 32) * 32;
 
 // finds the most common two colours in an image and the percentage by which primary dominates
-export const getDominantGradient = async (imageUrl: string): Promise<{ primary: string; secondary: string; primaryPercent: number }> => {
-	const fallback = { primary: "black", secondary: "black", primaryPercent: 100 };
+export const getDominantGradient = async (
+	imageUrl: string,
+): Promise<{ primary: string; secondary: string; primaryPercent: number }> => {
+	const fallback = {
+		primary: "black",
+		secondary: "black",
+		primaryPercent: 100,
+	};
 	try {
 		const data = await loadImageData(imageUrl);
 		const size = 50;
@@ -40,7 +49,9 @@ export const getDominantGradient = async (imageUrl: string): Promise<{ primary: 
 		const primary = sorted[0] ? `rgb(${sorted[0][0]})` : "black";
 		const secondary = sorted[1] ? `rgb(${sorted[1][0]})` : primary;
 		const total = (sorted[0]?.[1] ?? 0) + (sorted[1]?.[1] ?? 0);
-		const primaryPercent = sorted[0] ? Math.round((sorted[0][1] / total) * 100) : 100;
+		const primaryPercent = sorted[0]
+			? Math.round((sorted[0][1] / total) * 100)
+			: 100;
 
 		return { primary, secondary, primaryPercent };
 	} catch {
@@ -56,7 +67,10 @@ export const getDominantColor = async (imageUrl: string): Promise<string> => {
 		const cx = size / 2;
 		const cy = size / 2;
 		const innerRadius = size / 4;
-		let r = 0, g = 0, b = 0, count = 0;
+		let r = 0,
+			g = 0,
+			b = 0,
+			count = 0;
 
 		for (let y = 0; y < size; y++) {
 			for (let x = 0; x < size; x++) {
@@ -119,7 +133,7 @@ export const useTrackColors = (cover?: string) => {
 					return setFlat(secondary);
 				if (!primaryGray && secondaryGray) return setFlat(primary);
 
-				if (primaryPercent >= 85) {
+				if (primaryPercent >= 80) {
 					getDominantColor(cover).then(setFlat);
 					return;
 				}
