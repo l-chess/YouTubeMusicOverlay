@@ -121,33 +121,38 @@ export const useTrackColors = (cover?: string) => {
 			return;
 		}
 
-		getDominantGradient(cover).then(({ primary, secondary, primaryPercent }) => {
-			const isGrayscale = (rgb: string) => {
-				const parts = rgb.substring(4, rgb.length - 1).split(",");
-				return parts.every((e) => e === parts[0]);
-			};
+		getDominantGradient(cover).then(
+			({ primary, secondary, primaryPercent }) => {
+				const isGrayscale = (rgb: string) => {
+					const parts = rgb.substring(4, rgb.length - 1).split(",");
+					return parts.every((e) => e === parts[0]);
+				};
 
-			const primaryGray = isGrayscale(primary);
-			const secondaryGray = isGrayscale(secondary);
+				const primaryGray = isGrayscale(primary);
+				const secondaryGray = isGrayscale(secondary);
 
-			const setFlat = (color: string) => {
-				setBgColor(color);
-				setTextColor(isColorLight(color) ? "black" : "white");
-			};
+				const setFlat = (color: string) => {
+					setBgColor(color);
+					setTextColor(isColorLight(color) ? "black" : "white");
+				};
 
-			if (primaryGray && secondaryGray) return setFlat(primary);
-			if (primaryGray && !secondaryGray && primaryPercent < 70) return setFlat(secondary);
-			if (!primaryGray && secondaryGray) return setFlat(primary);
+				if (primaryGray && secondaryGray) return setFlat(primary);
+				if (primaryGray && !secondaryGray && primaryPercent < 60)
+					return setFlat(secondary);
+				if (!primaryGray && secondaryGray) return setFlat(primary);
 
-			if (primaryPercent >= 85) {
-				getDominantColor(cover).then(setFlat);
-				return;
-			}
+				if (primaryPercent >= 85) {
+					getDominantColor(cover).then(setFlat);
+					return;
+				}
 
-			const softenedPercent = Math.round(primaryPercent * 0.7);
-			setBgColor(`linear-gradient(135deg, ${primary} ${softenedPercent}%, ${secondary})`);
-			setTextColor(isColorLight(primary) ? "black" : "white");
-		});
+				const softenedPercent = Math.round(primaryPercent * 0.7);
+				setBgColor(
+					`linear-gradient(135deg, ${primary} ${softenedPercent}%, ${secondary})`,
+				);
+				setTextColor(isColorLight(primary) ? "black" : "white");
+			},
+		);
 	}, [cover]);
 
 	return { bgColor, textColor };
