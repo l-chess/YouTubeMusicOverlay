@@ -125,8 +125,24 @@ export const useTrackColors = (cover?: string) => {
 						.substring(4, secondary.length - 1)
 						.split(",");
 
-					if ( // if primary or secondary are on the grayscale, primary is set as background
-						primaryRGB.every((e) => e === primaryRGB[0]) ||
+					if (
+						// if primary and secondary are on the grayscale, primary is set as background
+						primaryRGB.every((e) => e === primaryRGB[0]) &&
+						secondaryRGB.every((e) => e === secondaryRGB[0])
+					) {
+						setBgColor(primary);
+						setTextColor(isColorLight(primary) ? "black" : "white");
+					} else if (
+						// if primary doesn't dominate too much and is on grayscale, while secondary isn't, secondary is background
+						primaryRGB.every((e) => e === primaryRGB[0]) &&
+						!secondaryRGB.every((e) => e === secondaryRGB[0]) &&
+						primaryPercent < 70
+					) {
+						setBgColor(secondary);
+						setTextColor(isColorLight(secondary) ? "black" : "white");
+					} else if (
+						// set primary if primary isn't grayscale, but secondary is
+						!primaryRGB.every((e) => e === primaryRGB[0]) &&
 						secondaryRGB.every((e) => e === secondaryRGB[0])
 					) {
 						setBgColor(primary);
