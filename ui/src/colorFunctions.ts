@@ -133,7 +133,7 @@ export const useTrackColors = (cover?: string) => {
 					return setFlat(secondary);
 				if (!primaryGray && secondaryGray) return setFlat(primary);
 
-				if (primaryPercent >= 80) {
+				if (primaryPercent >= 85) {
 					getDominantColor(cover).then(setFlat);
 					return;
 				}
