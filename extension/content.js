@@ -2,7 +2,7 @@ let lastTrack = { title: null, artist: null, cover: null };
 
 // change album cover resolution
 function upgradeCoverUrl(url, size = 544) {
-  if (!url || !url.includes('lh3.googleusercontent.com')) return url;
+  if (!url || !url.includes('googleusercontent.com')) return url;
   const parts = url.split('=');
   const lastPart = parts[parts.length - 1];
   const upgraded = lastPart.replace(/w\d+-h\d+/, 'w' + size + '-h' + size);

@@ -115,6 +115,8 @@ export const useTrackColors = (cover?: string) => {
 
 		getDominantGradient(cover).then(
 			({ primary, secondary, primaryPercent }) => {
+				console.log(primary, secondary, primaryPercent);
+
 				const isGrayscale = (rgb: string) => {
 					const parts = rgb.substring(4, rgb.length - 1).split(",");
 					return parts.every((e) => e === parts[0]);
